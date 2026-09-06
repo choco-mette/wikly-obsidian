@@ -5,6 +5,8 @@
   "packageManager": "pnpm@12.3.4",
   "scripts": {
     "build": "pnpm --recursive run build",
+    "db:generate": "pnpm --filter @wikly/web db:generate",
+    "db:migrate": "pnpm --filter @wikly/web db:migrate",
     "dev": "pnpm --filter @wikly/web dev",
     "dev:web": "pnpm --filter @wikly/web dev",
     "dev:plugin": "pnpm --filter @wikly/obsidian-plugin dev",
@@ -16,6 +18,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
+    "dotenv": "^16.6.0",
     "prettier": "^3.6.0",
     "typescript": "^5.8.0",
     "vitest": "^3.2.0"

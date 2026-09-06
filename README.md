@@ -60,3 +60,7 @@ Phase 0 is complete: workspace scaffolding, service definitions, web and plugin
 stubs, formatting/linting/typecheck/test commands, and environment guidance are
 in place. The detailed roadmap and architecture assumptions live in
 [`docs/implementation-plan.md`](docs/implementation-plan.md).
+
+Before continuing implementation, read the chronological
+[`CHANGELOG.md`](CHANGELOG.md) for completed work, validations, decisions, and
+open blockers.

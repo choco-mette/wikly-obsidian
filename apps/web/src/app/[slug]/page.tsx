@@ -1,40 +1,41 @@
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Hash } from 'lucide-react'
-import { sitesRepo, pagesRepo } from '../lib/db'
-import { renderMarkdown } from '../lib/markdown/pipeline'
-import { Backlinks } from '../components/Backlinks'
-import { TableOfContents } from '../components/TableOfContents'
+import type { Metadata } from 'next'
+import { Calendar, ChevronRight, Hash } from 'lucide-react'
+import { sitesRepo, pagesRepo } from '../../lib/db'
+import { renderMarkdown } from '../../lib/markdown/pipeline'
+import { Backlinks } from '../../components/Backlinks'
+import { TableOfContents } from '../../components/TableOfContents'
 
 export const dynamic = 'force-dynamic'
 
-export default async function HomePage() {
+interface PageProps {
+  params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params
   const site = await sitesRepo.getSiteBySlug('default')
+  if (!site) return { title: 'Wikly' }
 
-  if (!site) {
-    return (
-      <div className="content-inner">
-        <div className="article-container">
-          <h1 className="page-title">Wikly</h1>
-          <p>
-            Situs belum dikonfigurasi. Jalankan seeder database terlebih dahulu.
-          </p>
-        </div>
-      </div>
-    )
+  const page = await pagesRepo.getPublishedPageBySlug(site.id, slug)
+  if (!page) return { title: 'Catatan Tidak Ditemukan' }
+
+  return {
+    title: page.title,
+    description: `Catatan ${page.title} di ${site.name}`,
   }
+}
 
-  const page = await pagesRepo.getPublishedPageBySlug(site.id, 'home')
+export default async function ArticlePage({ params }: PageProps) {
+  const { slug } = await params
+  const site = await sitesRepo.getSiteBySlug('default')
+  if (!site) notFound()
 
-  if (!page) {
-    return (
-      <div className="content-inner">
-        <div className="article-container">
-          <h1 className="page-title">{site.name}</h1>
-          <p>Belum ada halaman &lsquo;home&rsquo; yang dipublikasikan.</p>
-        </div>
-      </div>
-    )
-  }
+  const page = await pagesRepo.getPublishedPageBySlug(site.id, slug)
+  if (!page) notFound()
 
   const { html, toc } = await renderMarkdown(page.markdown)
   const backlinks = await pagesRepo.getPageBacklinks(page.id)
@@ -47,6 +48,11 @@ export default async function HomePage() {
     <div className="content-inner">
       <article className="article-container">
         <header className="page-header">
+          <nav className="breadcrumbs" aria-label="Breadcrumb">
+            <Link href="/">Beranda</Link>
+            <ChevronRight size={14} />
+            <span>{page.title}</span>
+          </nav>
           <h1 className="page-title">{page.title}</h1>
           <div className="page-meta">
             <div
