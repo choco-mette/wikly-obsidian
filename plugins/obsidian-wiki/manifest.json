@@ -1,0 +1,9 @@
+{
+  "id": "wikly-publisher",
+  "name": "Wikly Publisher",
+  "version": "0.1.0",
+  "minAppVersion": "1.6.0",
+  "description": "Publishes explicitly approved Obsidian notes to Wikly.",
+  "author": "Wikly",
+  "isDesktopOnly": false
+}

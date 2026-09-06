@@ -1,0 +1,23 @@
+{
+  "name": "wikly-obsidian",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@12.3.4",
+  "scripts": {
+    "build": "pnpm --recursive run build",
+    "dev": "pnpm --filter @wikly/web dev",
+    "dev:web": "pnpm --filter @wikly/web dev",
+    "dev:plugin": "pnpm --filter @wikly/obsidian-plugin dev",
+    "lint": "pnpm --recursive run lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm --recursive run test",
+    "typecheck": "pnpm --recursive run typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "prettier": "^3.6.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.2.0"
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+.pnpm-store/
+.next/
+apps/web/next-env.d.ts
+dist/
+coverage/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example
+plugins/obsidian-wiki/main.js
+plugins/obsidian-wiki/main.js.map
+data/

@@ -1,0 +1,8 @@
+node_modules/
+.next/
+apps/web/next-env.d.ts
+dist/
+coverage/
+pnpm-lock.yaml
+plugins/obsidian-wiki/main.js
+obsidian-wiki-PRD(1).md
