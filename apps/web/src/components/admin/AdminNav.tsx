@@ -24,10 +24,10 @@ export function AdminNav({ userEmail }: AdminNavProps) {
 
   const navItems = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-    { href: '/admin/pages', label: 'Catatan', icon: FileText },
-    { href: '/admin/tags', label: 'Tag', icon: Hash },
-    { href: '/admin/assets', label: 'Aset / Lampiran', icon: ImageIcon },
-    { href: '/admin/devices', label: 'Perangkat & Pairing', icon: Radio },
+    { href: '/admin/pages', label: 'Notes', icon: FileText },
+    { href: '/admin/tags', label: 'Tags', icon: Hash },
+    { href: '/admin/assets', label: 'Media Assets', icon: ImageIcon },
+    { href: '/admin/devices', label: 'Devices & Pairing', icon: Radio },
     {
       href: '/admin/pending-changes',
       label: 'Pending Changes',
@@ -51,7 +51,7 @@ export function AdminNav({ userEmail }: AdminNavProps) {
         <div className="admin-logo-badge">W</div>
         <div className="admin-logo-info">
           <span className="admin-logo-title">Wikly Admin</span>
-          <span className="admin-logo-sub">Panel Pengelola</span>
+          <span className="admin-logo-sub">Management Panel</span>
         </div>
       </div>
 
@@ -78,7 +78,7 @@ export function AdminNav({ userEmail }: AdminNavProps) {
       <div className="admin-sidebar-footer">
         <Link href="/" target="_blank" className="admin-nav-item secondary">
           <ExternalLink size={16} />
-          <span>Buka Wiki Publik</span>
+          <span>Open Public Wiki</span>
         </Link>
 
         {userEmail && (
@@ -98,7 +98,7 @@ export function AdminNav({ userEmail }: AdminNavProps) {
           type="button"
         >
           <LogOut size={16} />
-          <span>Keluar</span>
+          <span>Sign Out</span>
         </button>
       </div>
     </aside>

@@ -15,7 +15,7 @@ export function RetryChangeButton({ changeId }: { changeId: string }) {
         method: 'POST',
       })
       if (!res.ok) {
-        throw new Error('Gagal me-retry perubahan')
+        throw new Error('Failed to retry change')
       }
       router.refresh()
     } catch (err) {
@@ -31,10 +31,10 @@ export function RetryChangeButton({ changeId }: { changeId: string }) {
       onClick={handleRetry}
       disabled={loading}
       className="btn-secondary btn-sm flex items-center gap-1"
-      title="Ulangi kembali operasi ini ke status pending"
+      title="Reset this operation back to pending"
     >
       <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
-      <span>{loading ? 'Mengulang...' : 'Retry'}</span>
+      <span>{loading ? 'Retrying...' : 'Retry'}</span>
     </button>
   )
 }

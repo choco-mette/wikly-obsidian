@@ -20,7 +20,7 @@ export default async function AdminDashboardPage() {
   if (!site) {
     return (
       <div className="admin-page-content">
-        <p>Site default belum dikonfigurasi.</p>
+        <p>Default site is not configured yet.</p>
       </div>
     )
   }
@@ -30,16 +30,16 @@ export default async function AdminDashboardPage() {
   return (
     <div className="admin-page-content">
       <AdminHeader
-        title="Dashboard Ringkasan"
-        description="Gambaran status catatan Obsidian, aset lampiran, dan perangkat terhubung."
+        title="Dashboard Overview"
+        description="Overview of Obsidian notes, media assets, and connected devices."
       >
         <Link href="/admin/devices" className="btn-secondary">
           <PlusCircle size={15} />
-          <span>Tambah Perangkat</span>
+          <span>Add Device</span>
         </Link>
         <Link href="/" target="_blank" className="btn-primary">
           <ExternalLink size={15} />
-          <span>Lihat Wiki Publik</span>
+          <span>View Public Wiki</span>
         </Link>
       </AdminHeader>
 
@@ -50,7 +50,7 @@ export default async function AdminDashboardPage() {
             <FileText size={22} />
           </div>
           <div className="stat-card-body">
-            <span className="stat-card-label">Catatan Publik</span>
+            <span className="stat-card-label">Published Notes</span>
             <span className="stat-card-value">{stats.publishedPagesCount}</span>
           </div>
         </div>
@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
             <FileEdit size={22} />
           </div>
           <div className="stat-card-body">
-            <span className="stat-card-label">Draft / Belum Terbit</span>
+            <span className="stat-card-label">Draft Notes</span>
             <span className="stat-card-value">{stats.draftPagesCount}</span>
           </div>
         </div>
@@ -70,7 +70,7 @@ export default async function AdminDashboardPage() {
             <Hash size={22} />
           </div>
           <div className="stat-card-body">
-            <span className="stat-card-label">Total Tag Topik</span>
+            <span className="stat-card-label">Total Tags</span>
             <span className="stat-card-value">{stats.tagsCount}</span>
           </div>
         </div>
@@ -80,7 +80,7 @@ export default async function AdminDashboardPage() {
             <ImageIcon size={22} />
           </div>
           <div className="stat-card-body">
-            <span className="stat-card-label">Aset Lampiran</span>
+            <span className="stat-card-label">Media Assets</span>
             <span className="stat-card-value">
               {stats.assetsCount}
               {stats.orphanedAssetsCount > 0 && (
@@ -97,7 +97,7 @@ export default async function AdminDashboardPage() {
             <Radio size={22} />
           </div>
           <div className="stat-card-body">
-            <span className="stat-card-label">Perangkat Aktif</span>
+            <span className="stat-card-label">Active Devices</span>
             <span className="stat-card-value">{stats.activeDevicesCount}</span>
           </div>
         </div>
@@ -120,10 +120,10 @@ export default async function AdminDashboardPage() {
           <div className="admin-panel-header">
             <div className="admin-panel-title">
               <Clock size={16} />
-              <span>Catatan Terakhir Diperbarui</span>
+              <span>Recently Updated Notes</span>
             </div>
             <Link href="/admin/pages" className="panel-more-link">
-              Lihat Semua
+              View All
             </Link>
           </div>
 
@@ -131,17 +131,17 @@ export default async function AdminDashboardPage() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Judul</th>
+                  <th>Title</th>
                   <th>Status</th>
-                  <th>Revisi</th>
-                  <th>Diperbarui</th>
+                  <th>Revision</th>
+                  <th>Updated</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.recentPages.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="text-center text-muted">
-                      Belum ada catatan yang tersimpan.
+                      No notes stored yet.
                     </td>
                   </tr>
                 ) : (
@@ -168,7 +168,7 @@ export default async function AdminDashboardPage() {
                         </span>
                       </td>
                       <td className="text-muted text-sm">
-                        {new Date(page.updatedAt).toLocaleDateString('id-ID', {
+                        {new Date(page.updatedAt).toLocaleDateString('en-US', {
                           dateStyle: 'medium',
                         })}
                       </td>
@@ -185,10 +185,10 @@ export default async function AdminDashboardPage() {
           <div className="admin-panel-header">
             <div className="admin-panel-title">
               <RefreshCw size={16} />
-              <span>Antrian Perubahan (Write-Back)</span>
+              <span>Write-Back Change Queue</span>
             </div>
             <Link href="/admin/pending-changes" className="panel-more-link">
-              Lihat Semua
+              View All
             </Link>
           </div>
 
@@ -196,17 +196,17 @@ export default async function AdminDashboardPage() {
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Operasi</th>
+                  <th>Operation</th>
                   <th>Target Note ID</th>
                   <th>Status</th>
-                  <th>Waktu</th>
+                  <th>Time</th>
                 </tr>
               </thead>
               <tbody>
                 {stats.recentPendingChanges.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="text-center text-muted">
-                      Tidak ada antrian perubahan pending.
+                      No pending changes in queue.
                     </td>
                   </tr>
                 ) : (
@@ -231,7 +231,7 @@ export default async function AdminDashboardPage() {
                       </td>
                       <td className="text-muted text-sm">
                         {new Date(change.createdAt).toLocaleTimeString(
-                          'id-ID',
+                          'en-US',
                           {
                             timeStyle: 'short',
                           },

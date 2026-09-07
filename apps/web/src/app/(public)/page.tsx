@@ -16,7 +16,7 @@ export default async function HomePage() {
         <div className="article-container">
           <h1 className="page-title">Wikly</h1>
           <p>
-            Situs belum dikonfigurasi. Jalankan seeder database terlebih dahulu.
+            Site is not configured yet. Run database seeder first.
           </p>
         </div>
       </div>
@@ -30,7 +30,7 @@ export default async function HomePage() {
       <div className="content-inner">
         <div className="article-container">
           <h1 className="page-title">{site.name}</h1>
-          <p>Belum ada halaman &lsquo;home&rsquo; yang dipublikasikan.</p>
+          <p>No &lsquo;home&rsquo; page has been published yet.</p>
         </div>
       </div>
     )
@@ -40,7 +40,7 @@ export default async function HomePage() {
   const { html, toc } = await renderMarkdown(page.markdown, { assetMap })
   const backlinks = await pagesRepo.getPageBacklinks(page.id)
 
-  const formattedDate = new Intl.DateTimeFormat('id-ID', {
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
   }).format(page.updatedAt)
 
@@ -54,7 +54,7 @@ export default async function HomePage() {
               style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}
             >
               <Calendar size={15} />
-              <span>Diperbarui {formattedDate}</span>
+              <span>Updated {formattedDate}</span>
             </div>
             {page.tags.length > 0 && (
               <div className="tags-group">

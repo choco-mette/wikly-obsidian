@@ -7,9 +7,9 @@ import { GraphView } from '@/components/GraphView'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Graf Relasi Catatan',
+  title: 'Vault Graph View',
   description:
-    'Visualisasi interaktif graf relasi antar catatan dalam vault Obsidian',
+    'Interactive graph visualization of note relationships in this Obsidian vault',
 }
 
 export default async function GraphPage() {
@@ -23,26 +23,26 @@ export default async function GraphPage() {
       <div className="graph-page-container">
         <header className="page-header">
           <nav className="breadcrumbs" aria-label="Breadcrumb">
-            <Link href="/">Beranda</Link>
+            <Link href="/">Home</Link>
             <ChevronRight size={14} />
-            <span>Graf Relasi</span>
+            <span>Graph View</span>
           </nav>
           <div className="graph-page-title-row">
             <div>
-              <h1 className="page-title">Graf Pengetahuan Vault</h1>
+              <h1 className="page-title">Vault Knowledge Graph</h1>
               <p className="page-subtitle">
-                Visualisasi interaktif peta keterhubungan dan jejaring pemikiran
-                antar catatan
+                Interactive knowledge graph exploring connections between notes
+                across the vault
               </p>
             </div>
             <div className="graph-stats-badges">
               <span className="stat-badge">
                 <Network size={14} />
-                <strong>{graphData.nodes.length}</strong> Catatan
+                <strong>{graphData.nodes.length}</strong> Notes
               </span>
               <span className="stat-badge">
                 <Share2 size={14} />
-                <strong>{graphData.links.length}</strong> Tautan
+                <strong>{graphData.links.length}</strong> Relations
               </span>
             </div>
           </div>
@@ -52,7 +52,7 @@ export default async function GraphPage() {
           <GraphView
             initialData={graphData}
             height={640}
-            title="Peta Relasi Seluruh Vault"
+            title="Full Vault Relationship Graph"
           />
         </div>
       </div>

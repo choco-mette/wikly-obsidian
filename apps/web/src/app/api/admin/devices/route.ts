@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       const { siteId, name } = body
       if (!name || typeof name !== 'string' || !name.trim()) {
         return NextResponse.json(
-          { success: false, error: 'Nama perangkat wajib diisi' },
+          { success: false, error: 'Device name is required' },
           { status: 400 },
         )
       }
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
         const defaultSite = await sitesRepo.getSiteBySlug('default')
         if (!defaultSite) {
           return NextResponse.json(
-            { success: false, error: 'Site default tidak ditemukan' },
+            { success: false, error: 'Default site not found' },
             { status: 404 },
           )
         }
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
       const { deviceId } = body
       if (!deviceId) {
         return NextResponse.json(
-          { success: false, error: 'deviceId wajib diisi' },
+          { success: false, error: 'deviceId is required' },
           { status: 400 },
         )
       }
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       const { deviceId } = body
       if (!deviceId) {
         return NextResponse.json(
-          { success: false, error: 'deviceId wajib diisi' },
+          { success: false, error: 'deviceId is required' },
           { status: 400 },
         )
       }
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'Aksi tidak dikenali' },
+      { success: false, error: 'Unknown action' },
       { status: 400 },
     )
   } catch (error) {

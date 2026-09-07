@@ -59,7 +59,7 @@ export function DevicesClient({
 
       const data = await res.json()
       if (!res.ok || !data.success) {
-        setError(data.error || 'Gagal mendaftarkan perangkat')
+        setError(data.error || 'Failed to register device')
         setLoading(false)
         return
       }
@@ -70,7 +70,7 @@ export function DevicesClient({
       setLoading(false)
       router.refresh()
     } catch {
-      setError('Terjadi kesalahan jaringan')
+      setError('A network error occurred')
       setLoading(false)
     }
   }
@@ -78,7 +78,7 @@ export function DevicesClient({
   const handleRevoke = async (deviceId: string, name: string) => {
     if (
       !confirm(
-        `Cabut akses untuk perangkat "${name}"? Token perangkat akan segera tidak valid dan tidak dapat mempublikasikan catatan lagi.`,
+        `Revoke access for device "${name}"? Device token will become invalid immediately and will no longer be able to publish notes.`,
       )
     ) {
       return
@@ -100,10 +100,10 @@ export function DevicesClient({
         )
         router.refresh()
       } else {
-        alert(data.error || 'Gagal mencabut akses')
+        alert(data.error || 'Failed to revoke access')
       }
     } catch {
-      alert('Terjadi kesalahan jaringan')
+      alert('A network error occurred')
     }
   }
 
@@ -122,10 +122,10 @@ export function DevicesClient({
         setIsModalOpen(true)
         router.refresh()
       } else {
-        alert(data.error || 'Gagal membuat kode baru')
+        alert(data.error || 'Failed to generate new code')
       }
     } catch {
-      alert('Terjadi kesalahan jaringan')
+      alert('A network error occurred')
     }
   }
 
@@ -153,25 +153,25 @@ export function DevicesClient({
             href={'/admin/devices' as Route<string>}
             className={`filter-tab ${currentFilter === 'all' ? 'active' : ''}`}
           >
-            Semua
+            All
           </Link>
           <Link
             href={'/admin/devices?status=approved' as Route<string>}
             className={`filter-tab ${currentFilter === 'approved' ? 'active' : ''}`}
           >
-            Terverifikasi (Approved)
+            Approved
           </Link>
           <Link
             href={'/admin/devices?status=pending' as Route<string>}
             className={`filter-tab ${currentFilter === 'pending' ? 'active' : ''}`}
           >
-            Menunggu Pairing
+            Pending Pairing
           </Link>
           <Link
             href={'/admin/devices?status=revoked' as Route<string>}
             className={`filter-tab ${currentFilter === 'revoked' ? 'active' : ''}`}
           >
-            Dicabut (Revoked)
+            Revoked
           </Link>
         </div>
 
@@ -181,7 +181,7 @@ export function DevicesClient({
           type="button"
         >
           <PlusCircle size={15} />
-          <span>Daftarkan Perangkat Baru</span>
+          <span>Register New Device</span>
         </button>
       </div>
 
@@ -191,19 +191,19 @@ export function DevicesClient({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Nama Perangkat</th>
+                <th>Device Name</th>
                 <th>Status</th>
-                <th>Terakhir Terlihat</th>
-                <th>Disetujui Pada</th>
-                <th>Dibuat</th>
-                <th className="text-right">Aksi</th>
+                <th>Last Seen</th>
+                <th>Approved At</th>
+                <th>Created</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {devices.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center text-muted py-8">
-                    Belum ada perangkat terdaftar untuk filter ini.
+                    No devices registered for this filter.
                   </td>
                 </tr>
               ) : (
@@ -236,7 +236,7 @@ export function DevicesClient({
                     </td>
                     <td className="text-muted text-sm">
                       {device.lastSeenAt
-                        ? new Date(device.lastSeenAt).toLocaleString('id-ID', {
+                        ? new Date(device.lastSeenAt).toLocaleString('en-US', {
                             dateStyle: 'short',
                             timeStyle: 'short',
                           })
@@ -245,7 +245,7 @@ export function DevicesClient({
                     <td className="text-muted text-sm">
                       {device.approvedAt
                         ? new Date(device.approvedAt).toLocaleDateString(
-                            'id-ID',
+                            'en-US',
                             {
                               dateStyle: 'medium',
                             },
@@ -253,7 +253,7 @@ export function DevicesClient({
                         : '—'}
                     </td>
                     <td className="text-muted text-sm">
-                      {new Date(device.createdAt).toLocaleDateString('id-ID', {
+                      {new Date(device.createdAt).toLocaleDateString('en-US', {
                         dateStyle: 'medium',
                       })}
                     </td>
@@ -264,10 +264,10 @@ export function DevicesClient({
                             type="button"
                             onClick={() => handleRevoke(device.id, device.name)}
                             className="btn-danger-outline btn-sm"
-                            title="Cabut Akses Perangkat"
+                            title="Revoke Device Access"
                           >
                             <ShieldAlert size={14} />
-                            <span>Cabut Akses</span>
+                            <span>Revoke Access</span>
                           </button>
                         )}
                         {(device.status === 'pending' ||
@@ -278,10 +278,10 @@ export function DevicesClient({
                               handleRegenerate(device.id, device.name)
                             }
                             className="btn-secondary btn-sm"
-                            title="Buat Kode Pairing Baru"
+                            title="Generate New Pairing Code"
                           >
                             <RefreshCw size={14} />
-                            <span>Buat Kode Baru</span>
+                            <span>Generate Code</span>
                           </button>
                         )}
                       </div>
@@ -303,8 +303,8 @@ export function DevicesClient({
                 <Key size={18} />
                 <span>
                   {createdCode
-                    ? 'Kode Pairing One-Time'
-                    : 'Daftarkan Perangkat Baru'}
+                    ? 'One-Time Pairing Code'
+                    : 'Register New Device'}
                 </span>
               </div>
               <button
@@ -320,9 +320,9 @@ export function DevicesClient({
               {createdCode ? (
                 <div className="pairing-result-box">
                   <p className="text-sm text-muted mb-3">
-                    Perangkat <strong>{createdName}</strong> berhasil
-                    didaftarkan. Masukkan kode pairing ini pada pengaturan
-                    plugin Obsidian:
+                    Device <strong>{createdName}</strong> was successfully
+                    registered. Enter this pairing code in the Obsidian
+                    plugin settings:
                   </p>
 
                   <div className="pairing-code-display">
@@ -335,12 +335,12 @@ export function DevicesClient({
                       {copied ? (
                         <>
                           <Check size={16} />
-                          <span>Tersalin!</span>
+                          <span>Copied!</span>
                         </>
                       ) : (
                         <>
                           <Copy size={16} />
-                          <span>Salin</span>
+                          <span>Copy</span>
                         </>
                       )}
                     </button>
@@ -349,8 +349,8 @@ export function DevicesClient({
                   <div className="pairing-instructions">
                     <AlertTriangle size={15} />
                     <span>
-                      Kode ini hanya berlaku selama <strong>15 menit</strong>{' '}
-                      dan langsung dihanguskan setelah pertama kali dipasangkan.
+                      This code is only valid for <strong>15 minutes</strong>{' '}
+                      and will be invalidated immediately after the first pairing.
                     </span>
                   </div>
                 </div>
@@ -364,20 +364,20 @@ export function DevicesClient({
 
                   <div className="form-group">
                     <label htmlFor="deviceNameInput" className="form-label">
-                      Nama Perangkat
+                      Device Name
                     </label>
                     <input
                       id="deviceNameInput"
                       type="text"
                       required
-                      placeholder="Contoh: MacBook Pro Vault, iPad Obsidian"
+                      placeholder="e.g. MacBook Pro Vault, iPad Obsidian"
                       value={deviceName}
                       onChange={(e) => setDeviceName(e.target.value)}
                       className="form-input"
                       autoFocus
                     />
                     <small className="form-help">
-                      Beri nama yang mudah dikenali untuk perangkat ini.
+                      Give this device a recognizable name.
                     </small>
                   </div>
 
@@ -387,14 +387,14 @@ export function DevicesClient({
                       onClick={closeModal}
                       className="btn-secondary"
                     >
-                      Batal
+                      Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={loading}
                       className="btn-primary"
                     >
-                      {loading ? 'Mendaftarkan...' : 'Buat Kode Pairing'}
+                      {loading ? 'Registering...' : 'Generate Pairing Code'}
                     </button>
                   </div>
                 </form>
@@ -407,7 +407,7 @@ export function DevicesClient({
                     onClick={closeModal}
                     className="btn-primary w-full"
                   >
-                    Selesai
+                    Done
                   </button>
                 </div>
               )}

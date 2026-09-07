@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Terlalu banyak permintaan publikasi. Tunggu sebentar.',
+        error: 'Too many publish requests. Please wait.',
       },
       {
         status: 429,

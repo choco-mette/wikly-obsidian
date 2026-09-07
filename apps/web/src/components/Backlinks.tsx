@@ -16,7 +16,7 @@ export function Backlinks({ backlinks }: BacklinksProps) {
         <h2 id="backlinks-heading">Backlinks ({backlinks.length})</h2>
       </div>
       <p className="backlinks-subtitle">
-        Catatan lain yang menautkan ke halaman ini:
+        Other notes linking to this page:
       </p>
       <div className="backlinks-grid">
         {backlinks.map((link) => (
@@ -24,7 +24,7 @@ export function Backlinks({ backlinks }: BacklinksProps) {
             <span className="backlink-title">{link.title}</span>
             {link.linkText && (
               <span className="backlink-context">
-                sebagai &ldquo;{link.linkText}&rdquo;
+                as &ldquo;{link.linkText}&rdquo;
               </span>
             )}
           </Link>

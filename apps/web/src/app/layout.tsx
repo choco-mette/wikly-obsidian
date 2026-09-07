@@ -9,14 +9,14 @@ export const metadata: Metadata = {
     default: 'Wikly — Obsidian Knowledge Platform',
   },
   description:
-    'Publikasikan catatan Obsidian pilihan ke web publik berkecepatan tinggi.',
+    'Publish curated Obsidian notes to a lightning-fast public wiki.',
 }
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id">
+    <html lang="en">
       <body>{children}</body>
     </html>
   )

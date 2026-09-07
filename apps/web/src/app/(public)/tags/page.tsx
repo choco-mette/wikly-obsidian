@@ -4,9 +4,8 @@ import { Hash } from 'lucide-react'
 import { sitesRepo, tagsRepo } from '@/lib/db'
 
 export const metadata: Metadata = {
-  title: 'Daftar Tag',
-  description:
-    'Jelajahi seluruh kategori catatan berdasarkan topik tag Obsidian.',
+  title: 'Tags',
+  description: 'Explore all note categories based on Obsidian tags.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -19,16 +18,15 @@ export default async function TagsPage() {
     <div className="content-inner">
       <div className="article-container">
         <header className="page-header">
-          <h1 className="page-title">Daftar Tag</h1>
+          <h1 className="page-title">Tags</h1>
           <p className="page-meta">
-            Temukan topik dan catatan berdasarkan tag yang ditandai dari
-            Obsidian.
+            Discover topics and notes categorized by tags from Obsidian.
           </p>
         </header>
 
         {tags.length === 0 ? (
           <p style={{ color: 'var(--text-muted)' }}>
-            Belum ada tag yang dipublikasikan.
+            No tags published yet.
           </p>
         ) : (
           <div className="tags-grid">
@@ -48,7 +46,9 @@ export default async function TagsPage() {
                   <Hash size={18} color="var(--accent-green)" />
                   <span style={{ fontWeight: 600 }}>{tag.name}</span>
                 </div>
-                <span className="tag-card-count">{tag.count} catatan</span>
+                <span className="tag-card-count">
+                  {tag.count} {tag.count === 1 ? 'note' : 'notes'}
+                </span>
               </Link>
             ))}
           </div>

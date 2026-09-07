@@ -12,8 +12,8 @@ export async function generateMetadata({
 }: SearchPageProps): Promise<Metadata> {
   const { q } = await searchParams
   return {
-    title: q ? `Pencarian: "${q}"` : 'Pencarian Catatan',
-    description: 'Cari catatan dan pengetahuan di dalam Wikly vault.',
+    title: q ? `Search: "${q}"` : 'Search Notes',
+    description: 'Search notes and knowledge in the Wikly vault.',
   }
 }
 
@@ -31,7 +31,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     <div className="content-inner">
       <div className="article-container">
         <header className="page-header">
-          <h1 className="page-title">Pencarian Catatan</h1>
+          <h1 className="page-title">Search Notes</h1>
           <form action="/search" method="GET" style={{ marginTop: '1.25rem' }}>
             <div className="search-input-wrapper">
               <Search size={18} className="search-icon" />
@@ -39,7 +39,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 type="text"
                 name="q"
                 defaultValue={query}
-                placeholder="Ketik kata kunci untuk mencari..."
+                placeholder="Type keywords to search..."
                 className="search-input"
                 style={{
                   padding: '0.85rem 1rem 0.85rem 2.75rem',
@@ -59,7 +59,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               fontSize: '0.9rem',
             }}
           >
-            Ditemukan {results.length} hasil untuk &ldquo;{query}&rdquo;:
+            Found {results.length} results for &ldquo;{query}&rdquo;:
           </div>
         )}
 
@@ -74,13 +74,13 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
               color: 'var(--text-muted)',
             }}
           >
-            Tidak ada catatan yang cocok dengan kata kunci tersebut.
+            No notes matched your search query.
           </div>
         )}
 
         <div className="search-results-list">
           {results.map((page) => {
-            const formattedDate = new Intl.DateTimeFormat('id-ID', {
+            const formattedDate = new Intl.DateTimeFormat('en-US', {
               dateStyle: 'medium',
             }).format(page.updatedAt)
 
@@ -105,7 +105,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                   }}
                 >
                   <Calendar size={13} />
-                  <span>Diperbarui {formattedDate}</span>
+                  <span>Updated {formattedDate}</span>
                 </div>
               </Link>
             )

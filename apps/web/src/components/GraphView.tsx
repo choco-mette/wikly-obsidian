@@ -54,7 +54,7 @@ export function GraphView({
   depth = 1,
   compact = false,
   height = compact ? 300 : 500,
-  title = 'Hubungan Catatan',
+  title = 'Note Relations',
 }: GraphViewProps) {
   const router = useRouter()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -96,10 +96,10 @@ export function GraphView({
         if (depth) queryParams.set('depth', depth.toString())
 
         const res = await fetch(`/api/v1/graph?${queryParams.toString()}`)
-        if (!res.ok) throw new Error('Gagal memuat relasi catatan')
+        if (!res.ok) throw new Error('Failed to load note relationships')
         const json: GraphResponse = await res.json()
         if (!json.success || !json.data) {
-          throw new Error(json.error || 'Data graf kosong')
+          throw new Error(json.error || 'Graph data is empty')
         }
 
         if (isMounted) {
@@ -107,7 +107,7 @@ export function GraphView({
         }
       } catch (err) {
         if (isMounted) {
-          setError(err instanceof Error ? err.message : 'Kesalahan jaringan')
+          setError(err instanceof Error ? err.message : 'Network error')
         }
       } finally {
         if (isMounted) setLoading(false)
@@ -465,8 +465,8 @@ export function GraphView({
             type="button"
             className="graph-btn"
             onClick={zoomIn}
-            title="Perbesar"
-            aria-label="Perbesar"
+            title="Zoom In"
+            aria-label="Zoom In"
           >
             <ZoomIn size={14} />
           </button>
@@ -474,8 +474,8 @@ export function GraphView({
             type="button"
             className="graph-btn"
             onClick={zoomOut}
-            title="Perkecil"
-            aria-label="Perkecil"
+            title="Zoom Out"
+            aria-label="Zoom Out"
           >
             <ZoomOut size={14} />
           </button>
@@ -483,8 +483,8 @@ export function GraphView({
             type="button"
             className="graph-btn"
             onClick={resetView}
-            title="Atur Ulang Tampilan"
-            aria-label="Atur Ulang"
+            title="Reset View"
+            aria-label="Reset View"
           >
             <RotateCcw size={14} />
           </button>
@@ -494,7 +494,7 @@ export function GraphView({
       {loading && (
         <div className="graph-status">
           <span className="graph-spinner" />
-          <span>Memuat relasi catatan...</span>
+          <span>Loading note relationships...</span>
         </div>
       )}
 
@@ -506,7 +506,7 @@ export function GraphView({
 
       {!loading && !error && graphData && graphData.nodes.length === 0 && (
         <div className="graph-status">
-          <span>Tidak ada catatan terhubung</span>
+          <span>No connected notes</span>
         </div>
       )}
 
@@ -518,17 +518,17 @@ export function GraphView({
         onMouseUp={handleMouseUp}
         onClick={handleClick}
         role="img"
-        aria-label="Graf navigasi relasi catatan"
+        aria-label="Note relationship graph navigation"
       />
 
       <div className="graph-legend">
         <div className="legend-item">
           <span className="legend-dot dot-current" />
-          <span>Halaman Ini</span>
+          <span>Current Note</span>
         </div>
         <div className="legend-item">
           <span className="legend-dot dot-linked" />
-          <span>Catatan Terhubung</span>
+          <span>Connected Notes</span>
         </div>
       </div>
     </div>

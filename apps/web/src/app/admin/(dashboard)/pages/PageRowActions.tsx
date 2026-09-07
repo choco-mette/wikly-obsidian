@@ -60,7 +60,7 @@ export function PageRowActions({ page }: PageRowActionsProps) {
     if (add.length === 0 && remove.length === 0) {
       setMessage({
         type: 'error',
-        text: 'Tidak ada perubahan tag yang dilakukan.',
+        text: 'No tag changes were made.',
       })
       setLoading(false)
       return
@@ -85,12 +85,12 @@ export function PageRowActions({ page }: PageRowActionsProps) {
 
       const data = await res.json()
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Gagal mendaftarkan perubahan write-back')
+        throw new Error(data.error || 'Failed to register write-back change')
       }
 
       setMessage({
         type: 'success',
-        text: 'Perubahan tag berhasil didaftarkan ke antrean write-back Obsidian!',
+        text: 'Tag changes successfully enqueued for Obsidian write-back!',
       })
       setTimeout(() => {
         setModalOpen(false)
@@ -99,7 +99,7 @@ export function PageRowActions({ page }: PageRowActionsProps) {
     } catch (err: unknown) {
       setMessage({
         type: 'error',
-        text: err instanceof Error ? err.message : 'Terjadi kesalahan sistem',
+        text: err instanceof Error ? err.message : 'A system error occurred',
       })
     } finally {
       setLoading(false)
@@ -112,14 +112,14 @@ export function PageRowActions({ page }: PageRowActionsProps) {
         <button
           onClick={handleOpen}
           className="btn-icon"
-          title="Patch Tag Frontmatter (Write-Back)"
+          title="Patch Frontmatter Tags (Write-Back)"
         >
           <Tag size={15} />
         </button>
         <Link
           href={`/admin/pages/${page.id}/revisions` as Route<string>}
           className="btn-icon"
-          title="Lihat Riwayat Revisi"
+          title="View Revision History"
         >
           <GitCommit size={15} />
         </Link>
@@ -128,7 +128,7 @@ export function PageRowActions({ page }: PageRowActionsProps) {
             href={`/${page.slug}` as Route<string>}
             target="_blank"
             className="btn-icon"
-            title="Buka Halaman Publik"
+            title="Open Public Page"
           >
             <ExternalLink size={15} />
           </Link>
@@ -139,7 +139,7 @@ export function PageRowActions({ page }: PageRowActionsProps) {
         <div className="modal-backdrop">
           <div className="modal-box">
             <div className="modal-header">
-              <h3>Edit Tag Frontmatter (Write-Back)</h3>
+              <h3>Edit Frontmatter Tags (Write-Back)</h3>
               <button
                 onClick={() => setModalOpen(false)}
                 className="modal-close"
@@ -150,15 +150,14 @@ export function PageRowActions({ page }: PageRowActionsProps) {
 
             <div className="modal-body">
               <p className="modal-desc">
-                Perubahan tag akan dikirim sebagai operasi{' '}
-                <code>frontmatter.patch</code> ke antrean{' '}
-                <strong>pending changes</strong> dan diaplikasikan ke catatan
-                Obsidian Vault oleh plugin.
+                Tag changes will be sent as a <code>frontmatter.patch</code>{' '}
+                operation to the <strong>pending changes</strong> queue and
+                applied to the Obsidian Vault note by the plugin.
               </p>
 
               <div className="note-info-card">
                 <div>
-                  <strong>Catatan:</strong> {page.title}
+                  <strong>Note:</strong> {page.title}
                 </div>
                 <div>
                   <small className="text-muted font-mono">
@@ -174,10 +173,10 @@ export function PageRowActions({ page }: PageRowActionsProps) {
               )}
 
               <div className="tag-editor-section">
-                <label className="form-label">Daftar Tag Aktif</label>
+                <label className="form-label">Active Tags List</label>
                 <div className="tag-chips-container">
                   {tags.length === 0 ? (
-                    <span className="text-muted text-xs">Belum ada tag.</span>
+                    <span className="text-muted text-xs">No tags yet.</span>
                   ) : (
                     tags.map((tag) => (
                       <span key={tag} className="tag-chip">
@@ -199,11 +198,11 @@ export function PageRowActions({ page }: PageRowActionsProps) {
                     type="text"
                     value={newTagInput}
                     onChange={(e) => setNewTagInput(e.target.value)}
-                    placeholder="Tambah tag baru (misal: mikrotik)..."
+                    placeholder="Add new tag (e.g., networking)..."
                     className="form-input"
                   />
                   <button type="submit" className="btn-secondary">
-                    Tambah
+                    Add
                   </button>
                 </form>
               </div>
@@ -216,7 +215,7 @@ export function PageRowActions({ page }: PageRowActionsProps) {
                 className="btn-secondary"
                 disabled={loading}
               >
-                Batal
+                Cancel
               </button>
               <button
                 type="button"
@@ -224,7 +223,7 @@ export function PageRowActions({ page }: PageRowActionsProps) {
                 className="btn-primary"
                 disabled={loading}
               >
-                {loading ? 'Mengirim...' : 'Kirim Write-Back'}
+                {loading ? 'Sending...' : 'Send Write-Back'}
               </button>
             </div>
           </div>

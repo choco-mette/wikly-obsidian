@@ -29,8 +29,8 @@ export default async function AdminPagesPage({
   return (
     <div className="admin-page-content">
       <AdminHeader
-        title="Manajemen Catatan"
-        description="Daftar catatan Obsidian yang terdaftar dan diproyeksikan ke server."
+        title="Note Management"
+        description="List of Obsidian notes registered and projected to the server."
       />
 
       {/* Filter and Search Bar */}
@@ -41,7 +41,7 @@ export default async function AdminPagesPage({
             type="text"
             name="q"
             defaultValue={q || ''}
-            placeholder="Cari judul, slug, atau path vault..."
+            placeholder="Search title, slug, or vault path..."
             className="admin-search-input"
           />
           {status && <input type="hidden" name="status" value={status} />}
@@ -54,7 +54,7 @@ export default async function AdminPagesPage({
             }
             className={`filter-tab ${!status || status === 'all' ? 'active' : ''}`}
           >
-            Semua
+            All
           </Link>
           <Link
             href={
@@ -62,7 +62,7 @@ export default async function AdminPagesPage({
             }
             className={`filter-tab ${status === 'published' ? 'active' : ''}`}
           >
-            Terbit
+            Published
           </Link>
           <Link
             href={
@@ -70,7 +70,7 @@ export default async function AdminPagesPage({
             }
             className={`filter-tab ${status === 'unpublished' ? 'active' : ''}`}
           >
-            Draft / Nonaktif
+            Draft / Inactive
           </Link>
         </div>
       </div>
@@ -81,20 +81,20 @@ export default async function AdminPagesPage({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Judul Catatan</th>
-                <th>Path Vault</th>
+                <th>Note Title</th>
+                <th>Vault Path</th>
                 <th>Status</th>
-                <th>Tag</th>
-                <th>Revisi</th>
-                <th>Diperbarui</th>
-                <th className="text-right">Aksi</th>
+                <th>Tags</th>
+                <th>Revision</th>
+                <th>Updated</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {pagesList.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center text-muted py-8">
-                    Tidak ada catatan yang cocok dengan pencarian atau filter.
+                    No notes matched your search or filter.
                   </td>
                 </tr>
               ) : (
@@ -141,7 +141,7 @@ export default async function AdminPagesPage({
                       <span className="revision-pill">rev {page.revision}</span>
                     </td>
                     <td className="text-muted text-sm">
-                      {new Date(page.updatedAt).toLocaleDateString('id-ID', {
+                      {new Date(page.updatedAt).toLocaleDateString('en-US', {
                         dateStyle: 'medium',
                       })}
                     </td>

@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 export default async function AdminTagsPage() {
   const site = await sitesRepo.getSiteBySlug('default')
   if (!site) {
-    return <div className="admin-page-content">Site tidak ditemukan.</div>
+    return <div className="admin-page-content">Site not found.</div>
   }
 
   const tagsList = await tagsRepo.getAllTagsWithCount(site.id)
@@ -17,8 +17,8 @@ export default async function AdminTagsPage() {
   return (
     <div className="admin-page-content">
       <AdminHeader
-        title="Manajemen Tag"
-        description="Daftar tag yang diekstrak secara otomatis dari frontmatter catatan Obsidian."
+        title="Tag Management"
+        description="Tags automatically extracted from Obsidian note frontmatter."
       />
 
       <div className="admin-panel-box">
@@ -26,17 +26,17 @@ export default async function AdminTagsPage() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Nama Tag</th>
-                <th>Slug URL</th>
-                <th>Catatan Terkait</th>
-                <th className="text-right">Aksi</th>
+                <th>Tag Name</th>
+                <th>URL Slug</th>
+                <th>Tagged Notes</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {tagsList.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="text-center text-muted py-8">
-                    Belum ada tag yang terdaftar dari catatan.
+                    No tags registered from notes yet.
                   </td>
                 </tr>
               ) : (
@@ -56,14 +56,16 @@ export default async function AdminTagsPage() {
                       </code>
                     </td>
                     <td>
-                      <span className="count-pill">{tag.count} catatan</span>
+                      <span className="count-pill">
+                        {tag.count} {tag.count === 1 ? 'note' : 'notes'}
+                      </span>
                     </td>
                     <td className="text-right">
                       <Link
                         href={`/tags/${tag.slug}` as Route<string>}
                         target="_blank"
                         className="btn-icon"
-                        title="Lihat Daftar Catatan Berdasarkan Tag Ini"
+                        title="View notes with this tag"
                       >
                         <ExternalLink size={15} />
                       </Link>

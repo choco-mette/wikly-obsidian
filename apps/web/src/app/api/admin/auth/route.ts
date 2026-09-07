@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
   if (!rateLimit.success) {
     return NextResponse.json(
-      { success: false, error: 'Terlalu banyak percobaan login. Tunggu 1 menit.' },
+      { success: false, error: 'Too many login attempts. Please wait 1 minute.' },
       {
         status: 429,
         headers: getRateLimitHeaders(rateLimit),
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
 
     if (!email || !password) {
       return NextResponse.json(
-        { success: false, error: 'Email dan kata sandi wajib diisi' },
+        { success: false, error: 'Email and password are required' },
         { status: 400 },
       )
     }
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const user = await usersRepo.verifyAdminCredentials(email, password)
     if (!user) {
       return NextResponse.json(
-        { success: false, error: 'Email atau kata sandi tidak valid' },
+        { success: false, error: 'Invalid email or password' },
         { status: 401 },
       )
     }

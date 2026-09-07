@@ -26,11 +26,11 @@ export async function generateMetadata({
   if (!site) return { title: 'Wikly' }
 
   const res = await pagesRepo.getPublishedPageBySlugOrAlias(site.id, slug)
-  if (!res) return { title: 'Catatan Tidak Ditemukan' }
+  if (!res) return { title: 'Note Not Found' }
 
   return {
     title: res.page.title,
-    description: `Catatan ${res.page.title} di ${site.name}`,
+    description: `Note ${res.page.title} on ${site.name}`,
   }
 }
 
@@ -89,7 +89,7 @@ export default async function ArticlePage({ params }: PageProps) {
   const backlinks = await pagesRepo.getPageBacklinks(page.id)
   const relatedPages = await pagesRepo.getRelatedPages(site.id, page.id, 4)
 
-  const formattedDate = new Intl.DateTimeFormat('id-ID', {
+  const formattedDate = new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
   }).format(page.updatedAt)
 
@@ -100,15 +100,15 @@ export default async function ArticlePage({ params }: PageProps) {
       <article className="article-container">
         <header className="page-header">
           <nav className="breadcrumbs" aria-label="Breadcrumb">
-            <Link href="/">Beranda</Link>
+            <Link href="/">Home</Link>
             <ChevronRight size={14} />
             <span>{page.title}</span>
           </nav>
           <h1 className="page-title">{page.title}</h1>
 
           {aliases.length > 0 && (
-            <div className="page-aliases" title="Nama alternatif catatan ini">
-              <span className="aliases-label">Juga dikenal sebagai:</span>
+            <div className="page-aliases" title="Alternative names for this note">
+              <span className="aliases-label">Also known as:</span>
               <div className="aliases-list">
                 {aliases.map((alias) => (
                   <span key={alias} className="alias-chip">
@@ -122,7 +122,7 @@ export default async function ArticlePage({ params }: PageProps) {
           <div className="page-meta">
             <div className="meta-date">
               <Calendar size={14} />
-              <span>Diperbarui {formattedDate}</span>
+              <span>Updated {formattedDate}</span>
             </div>
 
             {page.tags.length > 0 && (
@@ -163,7 +163,7 @@ export default async function ArticlePage({ params }: PageProps) {
             compact
             currentSlug={page.slug}
             depth={1}
-            title="Graf Lingkungan Catatan"
+            title="Neighborhood Graph"
             height={320}
           />
         </section>

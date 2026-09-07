@@ -18,7 +18,7 @@ export default async function AdminPendingChangesPage({
   const site = await sitesRepo.getSiteBySlug('default')
 
   if (!site) {
-    return <div className="admin-page-content">Site tidak ditemukan.</div>
+    return <div className="admin-page-content">Site not found.</div>
   }
 
   const currentStatus = status || 'all'
@@ -31,7 +31,7 @@ export default async function AdminPendingChangesPage({
     <div className="admin-page-content">
       <AdminHeader
         title="Pending Changes (Write-Back)"
-        description="Daftar operasi perubahan yang menunggu diklaim dan diaplikasikan oleh plugin Obsidian."
+        description="List of change operations waiting to be claimed and applied by the Obsidian plugin."
       />
 
       {/* Toolbar filter */}
@@ -41,7 +41,7 @@ export default async function AdminPendingChangesPage({
             href={'/admin/pending-changes' as Route<string>}
             className={`filter-tab ${currentStatus === 'all' ? 'active' : ''}`}
           >
-            Semua
+            All
           </Link>
           <Link
             href={'/admin/pending-changes?status=pending' as Route<string>}
@@ -53,19 +53,19 @@ export default async function AdminPendingChangesPage({
             href={'/admin/pending-changes?status=claimed' as Route<string>}
             className={`filter-tab ${currentStatus === 'claimed' ? 'active' : ''}`}
           >
-            Sedang Diklaim
+            Claimed
           </Link>
           <Link
             href={'/admin/pending-changes?status=applied' as Route<string>}
             className={`filter-tab ${currentStatus === 'applied' ? 'active' : ''}`}
           >
-            Berhasil Diaplikasikan
+            Applied
           </Link>
           <Link
             href={'/admin/pending-changes?status=failed' as Route<string>}
             className={`filter-tab ${currentStatus === 'failed' ? 'active' : ''}`}
           >
-            Gagal
+            Failed
           </Link>
         </div>
       </div>
@@ -76,20 +76,20 @@ export default async function AdminPendingChangesPage({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Operasi</th>
+                <th>Operation</th>
                 <th>Target Source ID</th>
                 <th>Status</th>
-                <th>Percobaan</th>
-                <th>Detail Payload</th>
-                <th>Dibuat</th>
-                <th className="text-right">Aksi</th>
+                <th>Attempts</th>
+                <th>Payload Details</th>
+                <th>Created</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {changes.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center text-muted py-8">
-                    Tidak ada antrian perubahan untuk filter ini.
+                    No change queue items for this filter.
                   </td>
                 </tr>
               ) : (
@@ -133,7 +133,7 @@ export default async function AdminPendingChangesPage({
                       </div>
                     </td>
                     <td className="text-muted text-sm">
-                      {new Date(item.createdAt).toLocaleString('id-ID', {
+                      {new Date(item.createdAt).toLocaleString('en-US', {
                         dateStyle: 'short',
                         timeStyle: 'short',
                       })}

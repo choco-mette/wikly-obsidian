@@ -31,7 +31,7 @@ export function WikiNav({ siteName, pages }: WikiNavProps) {
         <button
           className="mobile-menu-btn"
           onClick={() => setIsOpen(!isOpen)}
-          aria-label={isOpen ? 'Tutup navigasi' : 'Buka navigasi'}
+          aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
@@ -74,7 +74,7 @@ export function WikiNav({ siteName, pages }: WikiNavProps) {
             <Search size={16} className="search-icon" />
             <input
               type="text"
-              placeholder="Cari catatan..."
+              placeholder="Search notes..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="search-input"
@@ -85,14 +85,14 @@ export function WikiNav({ siteName, pages }: WikiNavProps) {
         {/* Navigation Sections */}
         <nav className="sidebar-nav">
           <div className="nav-group">
-            <div className="nav-group-title">Menu Utama</div>
+            <div className="nav-group-title">Main Menu</div>
             <Link
               href="/"
               onClick={() => setIsOpen(false)}
               className={`nav-link ${pathname === '/' || pathname === '/home' ? 'active' : ''}`}
             >
               <FileText size={16} />
-              <span>Halaman Depan</span>
+              <span>Home</span>
             </Link>
             <Link
               href="/tags"
@@ -100,7 +100,7 @@ export function WikiNav({ siteName, pages }: WikiNavProps) {
               className={`nav-link ${pathname.startsWith('/tags') ? 'active' : ''}`}
             >
               <Hash size={16} />
-              <span>Daftar Tag</span>
+              <span>Tags</span>
             </Link>
             <Link
               href="/graph"
@@ -108,13 +108,13 @@ export function WikiNav({ siteName, pages }: WikiNavProps) {
               className={`nav-link ${pathname === '/graph' ? 'active' : ''}`}
             >
               <Share2 size={16} />
-              <span>Graf Relasi</span>
+              <span>Graph View</span>
             </Link>
           </div>
 
           <div className="nav-group">
             <div className="nav-group-title">
-              Semua Catatan ({pages.length})
+              All Notes ({pages.length})
             </div>
             <ul className="pages-list">
               {pages.map((page) => {

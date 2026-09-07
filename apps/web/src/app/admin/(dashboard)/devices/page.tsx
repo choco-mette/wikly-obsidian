@@ -15,7 +15,7 @@ export default async function AdminDevicesPage({
   const site = await sitesRepo.getSiteBySlug('default')
 
   if (!site) {
-    return <div className="admin-page-content">Site tidak ditemukan.</div>
+    return <div className="admin-page-content">Site not found.</div>
   }
 
   const currentFilter = status || 'all'
@@ -24,8 +24,8 @@ export default async function AdminDevicesPage({
   return (
     <div className="admin-page-content">
       <AdminHeader
-        title="Perangkat & Pairing"
-        description="Kelola perangkat plugin Obsidian yang diizinkan menerbitkan catatan ke server ini."
+        title="Devices & Pairing"
+        description="Manage Obsidian plugin devices authorized to publish notes to this server."
       />
 
       <DevicesClient

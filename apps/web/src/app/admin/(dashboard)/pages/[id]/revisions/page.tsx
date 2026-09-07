@@ -34,13 +34,13 @@ export default async function PageRevisionsPage({
       <div className="mb-4">
         <Link href="/admin/pages" className="back-link">
           <ArrowLeft size={14} />
-          <span>Kembali ke Daftar Catatan</span>
+          <span>Back to Notes List</span>
         </Link>
       </div>
 
       <AdminHeader
-        title={`Riwayat Revisi: ${page.title}`}
-        description={`Menampilkan ${revisions.length} revisi untuk catatan ini.`}
+        title={`Revision History: ${page.title}`}
+        description={`Showing ${revisions.length} revisions for this note.`}
       >
         {page.status === 'published' && (
           <Link
@@ -49,7 +49,7 @@ export default async function PageRevisionsPage({
             className="btn-secondary"
           >
             <ExternalLink size={14} />
-            <span>Buka Halaman Publik</span>
+            <span>Open Public Page</span>
           </Link>
         )}
       </AdminHeader>
@@ -61,11 +61,11 @@ export default async function PageRevisionsPage({
           <code className="meta-val font-mono">{page.sourceId}</code>
         </div>
         <div className="meta-col">
-          <span className="meta-label">Path Vault</span>
+          <span className="meta-label">Vault Path</span>
           <code className="meta-val">{page.path}</code>
         </div>
         <div className="meta-col">
-          <span className="meta-label">Slug Publik</span>
+          <span className="meta-label">Public Slug</span>
           <span className="meta-val">/{page.slug}</span>
         </div>
         <div className="meta-col">
@@ -89,7 +89,7 @@ export default async function PageRevisionsPage({
                   <span>rev {rev.revision}</span>
                 </div>
                 {rev.revision === page.revision && (
-                  <span className="badge badge-success">Revisi Terkini</span>
+                  <span className="badge badge-success">Latest Revision</span>
                 )}
               </div>
 
@@ -97,7 +97,7 @@ export default async function PageRevisionsPage({
                 <div className="revision-meta-item">
                   <Clock size={13} />
                   <span>
-                    {new Date(rev.createdAt).toLocaleString('id-ID', {
+                    {new Date(rev.createdAt).toLocaleString('en-US', {
                       dateStyle: 'medium',
                       timeStyle: 'medium',
                     })}

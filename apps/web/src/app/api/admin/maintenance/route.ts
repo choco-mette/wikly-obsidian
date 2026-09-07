@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const defaultSite = await sitesRepo.getSiteBySlug('default')
     if (!defaultSite) {
       return NextResponse.json(
-        { success: false, error: 'Situs default tidak ditemukan' },
+        { success: false, error: 'Default site not found' },
         { status: 404 },
       )
     }
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Aksi tidak valid. Gunakan action=gc atau action=reconcile.',
+        error: 'Invalid action. Use action=gc or action=reconcile.',
       },
       { status: 400 },
     )

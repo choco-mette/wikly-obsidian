@@ -10,7 +10,7 @@ export function TableOfContents({ toc }: TableOfContentsProps) {
   return (
     <aside className="toc-container" aria-label="Table of contents">
       <div className="toc-card">
-        <h3 className="toc-title">Daftar Isi</h3>
+        <h3 className="toc-title">Table of Contents</h3>
         <nav>
           <ul className="toc-list">
             {toc.map((item) => (

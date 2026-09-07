@@ -14,7 +14,7 @@ export async function generateMetadata({
   const { slug } = await params
   return {
     title: `Tag: #${slug}`,
-    description: `Catatan dengan tag #${slug} di Wikly`,
+    description: `Notes tagged #${slug} on Wikly`,
   }
 }
 
@@ -33,7 +33,7 @@ export default async function TagSinglePage({ params }: TagPageProps) {
       <div className="article-container">
         <header className="page-header">
           <nav className="breadcrumbs" aria-label="Breadcrumb">
-            <Link href="/">Beranda</Link>
+            <Link href="/">Home</Link>
             <ChevronRight size={14} />
             <Link href="/tags">Tags</Link>
             <ChevronRight size={14} />
@@ -53,13 +53,13 @@ export default async function TagSinglePage({ params }: TagPageProps) {
             </h1>
           </div>
           <p className="page-meta">
-            {pages.length} catatan ditandai dengan tag ini.
+            {pages.length} {pages.length === 1 ? 'note' : 'notes'} tagged with this topic.
           </p>
         </header>
 
         <div className="search-results-list">
           {pages.map((page) => {
-            const formattedDate = new Intl.DateTimeFormat('id-ID', {
+            const formattedDate = new Intl.DateTimeFormat('en-US', {
               dateStyle: 'medium',
             }).format(page.updatedAt)
 
@@ -84,7 +84,7 @@ export default async function TagSinglePage({ params }: TagPageProps) {
                   }}
                 >
                   <Calendar size={13} />
-                  <span>Diperbarui {formattedDate}</span>
+                  <span>Updated {formattedDate}</span>
                 </div>
               </Link>
             )

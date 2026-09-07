@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: 'Terlalu banyak percobaan autentikasi. Silakan tunggu sebentar.',
+        error: 'Too many authentication attempts. Please wait.',
       },
       {
         status: 429,

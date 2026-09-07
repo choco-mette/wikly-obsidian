@@ -25,7 +25,7 @@ export default async function AdminAssetsPage({
   const site = await sitesRepo.getSiteBySlug('default')
 
   if (!site) {
-    return <div className="admin-page-content">Site tidak ditemukan.</div>
+    return <div className="admin-page-content">Site not found.</div>
   }
 
   const isOrphanedOnly = orphaned === 'true'
@@ -37,8 +37,8 @@ export default async function AdminAssetsPage({
   return (
     <div className="admin-page-content">
       <AdminHeader
-        title="Manajemen Aset & Lampiran"
-        description="Daftar file gambar, diagram, dan media binary yang diunggah dari Obsidian Vault."
+        title="Media Assets & Attachments"
+        description="List of images, diagrams, and binary media files uploaded from the Obsidian Vault."
       />
 
       {/* Toolbar */}
@@ -49,7 +49,7 @@ export default async function AdminAssetsPage({
             type="text"
             name="q"
             defaultValue={q || ''}
-            placeholder="Cari nama file atau hash..."
+            placeholder="Search file name or hash..."
             className="admin-search-input"
           />
           {orphaned && <input type="hidden" name="orphaned" value={orphaned} />}
@@ -62,7 +62,7 @@ export default async function AdminAssetsPage({
             }
             className={`filter-tab ${!isOrphanedOnly ? 'active' : ''}`}
           >
-            Semua Aset
+            All Assets
           </Link>
           <Link
             href={
@@ -70,7 +70,7 @@ export default async function AdminAssetsPage({
             }
             className={`filter-tab ${isOrphanedOnly ? 'active' : ''}`}
           >
-            Aset Orphan (Tidak Dirujuk)
+            Orphan Assets (Unreferenced)
           </Link>
         </div>
       </div>
@@ -81,21 +81,21 @@ export default async function AdminAssetsPage({
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Pratinjau & Nama File</th>
-                <th>Tipe Konten</th>
-                <th>Ukuran</th>
-                <th>Hash SHA-256</th>
+                <th>Preview & File Name</th>
+                <th>Content Type</th>
+                <th>Size</th>
+                <th>SHA-256 Hash</th>
                 <th>Status</th>
-                <th>Rujukan</th>
-                <th>Dibuat</th>
-                <th className="text-right">Aksi</th>
+                <th>References</th>
+                <th>Created</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {assetsList.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="text-center text-muted py-8">
-                    Belum ada aset media yang diunggah.
+                    No media assets uploaded yet.
                   </td>
                 </tr>
               ) : (
@@ -148,16 +148,17 @@ export default async function AdminAssetsPage({
                         <span
                           className={`badge ${isOrphan ? 'badge-danger' : 'badge-success'}`}
                         >
-                          {isOrphan ? 'Orphan' : 'Aktif'}
+                          {isOrphan ? 'Orphan' : 'Active'}
                         </span>
                       </td>
                       <td>
                         <span className="count-pill">
-                          {asset.referencedPagesCount} halaman
+                          {asset.referencedPagesCount}{' '}
+                          {asset.referencedPagesCount === 1 ? 'page' : 'pages'}
                         </span>
                       </td>
                       <td className="text-muted text-sm">
-                        {new Date(asset.createdAt).toLocaleDateString('id-ID', {
+                        {new Date(asset.createdAt).toLocaleDateString('en-US', {
                           dateStyle: 'medium',
                         })}
                       </td>
@@ -166,7 +167,7 @@ export default async function AdminAssetsPage({
                           href={asset.publicUrl as Route<string>}
                           target="_blank"
                           className="btn-icon"
-                          title="Buka File Aset"
+                          title="Open Asset File"
                         >
                           <ExternalLink size={15} />
                         </Link>

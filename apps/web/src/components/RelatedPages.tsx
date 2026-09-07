@@ -17,10 +17,10 @@ export function RelatedPages({ pages }: RelatedPagesProps) {
     >
       <div className="related-pages-header">
         <Compass className="related-icon" size={18} />
-        <h2 id="related-heading">Halaman Terkait ({pages.length})</h2>
+        <h2 id="related-heading">Related Notes ({pages.length})</h2>
       </div>
       <p className="related-subtitle">
-        Catatan dengan kesamaan topik atau relasi tautan:
+        Notes sharing similar topics or direct links:
       </p>
       <div className="related-pages-grid">
         {pages.map((item) => (

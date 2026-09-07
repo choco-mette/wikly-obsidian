@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
       const data = await res.json()
 
       if (!res.ok || !data.success) {
-        setError(data.error || 'Autentikasi gagal')
+        setError(data.error || 'Authentication failed')
         setLoading(false)
         return
       }
@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
       router.push('/admin')
       router.refresh()
     } catch {
-      setError('Terjadi kesalahan jaringan saat mencoba masuk')
+      setError('Network error occurred while attempting to sign in')
       setLoading(false)
     }
   }
@@ -47,7 +47,7 @@ export default function AdminLoginPage() {
           <div className="admin-logo-badge large">W</div>
           <h1 className="admin-login-title">Wikly Admin</h1>
           <p className="admin-login-desc">
-            Masuk untuk mengelola publikasi, aset, dan perangkat pairing
+            Sign in to manage publications, media assets, and connected devices
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
         <form onSubmit={handleSubmit} className="admin-login-form">
           <div className="form-group">
             <label htmlFor="email" className="form-label">
-              Email Administrator
+              Administrator Email
             </label>
             <div className="input-with-icon">
               <Mail size={16} className="input-icon" />
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
 
           <div className="form-group">
             <label htmlFor="password" className="form-label">
-              Kata Sandi
+              Password
             </label>
             <div className="input-with-icon">
               <Lock size={16} className="input-icon" />
@@ -100,14 +100,14 @@ export default function AdminLoginPage() {
             disabled={loading}
             className="btn-primary w-full"
           >
-            {loading ? 'Memverifikasi...' : 'Masuk ke Panel Admin'}
+            {loading ? 'Verifying...' : 'Sign In to Admin Panel'}
           </button>
         </form>
 
         <div className="admin-login-footer">
           <Link href="/" className="back-link">
             <ArrowLeft size={14} />
-            <span>Kembali ke Wiki Publik</span>
+            <span>Back to Public Wiki</span>
           </Link>
         </div>
       </div>
