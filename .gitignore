@@ -12,3 +12,5 @@ coverage/
 plugins/obsidian-wiki/main.js
 plugins/obsidian-wiki/main.js.map
 data/
+backups/
+

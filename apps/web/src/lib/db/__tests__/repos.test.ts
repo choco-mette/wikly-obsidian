@@ -5,8 +5,11 @@ import {
   createPage,
   getPageBySlug,
   getPublishedPageBySlug,
+  getPublishedPageBySlugOrAlias,
   getPublishedPages,
   getPageBacklinks,
+  getRelatedPages,
+  getGraphData,
   searchPages,
 } from '../repos/pages'
 import { getAllTagsWithCount, getPagesByTagSlug } from '../repos/tags'
@@ -114,5 +117,35 @@ describe('Database Repositories', () => {
     const guideTagResult = await getPagesByTagSlug(site.id, 'guide')
     expect(guideTagResult.tag).not.toBeNull()
     expect(guideTagResult.pages.length).toBeGreaterThanOrEqual(1)
+
+    // 7. Test getGraphData
+    const graph = await getGraphData(site.id)
+    expect(graph.nodes.length).toBeGreaterThanOrEqual(3)
+    expect(graph.links.length).toBeGreaterThanOrEqual(1)
+
+    // Neighborhood graph for 'home'
+    const homeGraph = await getGraphData(site.id, {
+      pageSlug: 'home',
+      depth: 1,
+    })
+    expect(homeGraph.nodes.length).toBeGreaterThanOrEqual(1)
+    const homeNode = homeGraph.nodes.find((n) => n.slug === 'home')
+    expect(homeNode?.isCurrent).toBe(true)
+
+    // 8. Test getRelatedPages
+    if (home) {
+      const related = await getRelatedPages(site.id, home.id, 5)
+      expect(related).toBeDefined()
+      expect(Array.isArray(related)).toBe(true)
+    }
+
+    // 9. Test getPublishedPageBySlugOrAlias
+    const resolvedCanonical = await getPublishedPageBySlugOrAlias(
+      site.id,
+      'home',
+    )
+    expect(resolvedCanonical).not.toBeNull()
+    expect(resolvedCanonical?.isAlias).toBe(false)
+    expect(resolvedCanonical?.canonicalSlug).toBe('home')
   })
 })

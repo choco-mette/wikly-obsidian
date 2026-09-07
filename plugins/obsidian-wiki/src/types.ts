@@ -1,6 +1,7 @@
 export interface WiklyPluginSettings {
   serverUrl: string
   siteId: string
+  pairingCode: string
   deviceName: string
   deviceToken: string
   debounceMs: number
@@ -10,7 +11,8 @@ export interface WiklyPluginSettings {
 export const DEFAULT_SETTINGS: WiklyPluginSettings = {
   serverUrl: '',
   siteId: '',
-  deviceName: 'Obsidian Device',
+  pairingCode: '',
+  deviceName: '',
   deviceToken: '',
   debounceMs: 3_000,
   syncIntervalMinutes: 5,

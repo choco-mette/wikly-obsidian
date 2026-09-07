@@ -6,3 +6,8 @@ export * as pagesRepo from './repos/pages'
 export * as tagsRepo from './repos/tags'
 export * as devicesRepo from './repos/devices'
 export * as publishingRepo from './repos/publishing'
+export * as assetsRepo from './repos/assets'
+export * as pendingChangesRepo from './repos/pendingChanges'
+export * as dashboardRepo from './repos/dashboard'
+export * as maintenanceRepo from './repos/maintenance'
+

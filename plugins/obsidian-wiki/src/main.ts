@@ -1,13 +1,17 @@
 import { Notice, Plugin, TFile, type TAbstractFile } from 'obsidian'
 import {
+  applyFrontmatterPatch,
   computeContentHash,
   extractSourceId,
+  type FrontmatterPatch,
   isPublishable,
   slugify,
 } from '@wikly/domain'
 import type { PublishRequest } from '@wikly/api-contracts'
 import { WiklyApiClient } from './api'
+import { scanNoteAssets } from './assets'
 import { ensureSourceId, splitFrontmatterAndBody } from './frontmatter'
+
 import { PublishQueue } from './queue'
 import { WiklySettingTab } from './settings'
 import {
@@ -25,6 +29,8 @@ export default class WiklyPublisherPlugin extends Plugin {
   api!: WiklyApiClient
   queue!: PublishQueue
   private statusBarItem!: HTMLElement
+  private applyingServerChanges = new Set<string>()
+  private syncTimerId: number | null = null
 
   async onload(): Promise<void> {
     await this.loadPluginData()
@@ -76,12 +82,26 @@ export default class WiklyPublisherPlugin extends Plugin {
 
     this.addCommand({
       id: 'wikly-sync-now',
-      name: 'Sync now (flush publish queue)',
+      name: 'Sync now (pull write-back changes & flush publish queue)',
       callback: async () => {
-        new Notice('Wikly: Processing publish queue...')
+        new Notice('Wikly: Syncing with server...')
+        const applied = await this.syncPendingChanges()
         await this.queue.flushAll()
+        new Notice(
+          `Wikly: Sync complete.${applied > 0 ? ` Applied ${applied} write-back change(s).` : ''}`,
+        )
       },
     })
+
+    // Setup periodic sync
+    const intervalMinutes = this.settings.syncIntervalMinutes || 5
+    this.syncTimerId = window.setInterval(
+      async () => {
+        await this.syncPendingChanges()
+      },
+      intervalMinutes * 60 * 1000,
+    )
+    this.registerInterval(this.syncTimerId)
 
     // Register Vault event listeners
     this.registerEvent(
@@ -110,6 +130,10 @@ export default class WiklyPublisherPlugin extends Plugin {
   }
 
   onunload(): void {
+    if (this.syncTimerId !== null) {
+      window.clearInterval(this.syncTimerId)
+      this.syncTimerId = null
+    }
     this.queue.clear()
   }
 
@@ -180,6 +204,11 @@ export default class WiklyPublisherPlugin extends Plugin {
     }
 
     if (!sourceId) return
+
+    // Loop suppression: ignore change if note is currently being patched from server write-back
+    if (this.applyingServerChanges.has(sourceId)) {
+      return
+    }
 
     // Quick content hash check to suppress duplicate publish
     const fileContent = await this.app.vault.read(abstractFile)
@@ -316,6 +345,45 @@ export default class WiklyPublisherPlugin extends Plugin {
         title,
     )
 
+    // Scan note for asset attachments
+    const vaultAssets = await scanNoteAssets(this.app, body, file.path)
+    const assetPayload: { path: string; hash: string }[] = []
+
+    if (vaultAssets.length > 0) {
+      const checkItems = vaultAssets.map((a) => ({
+        path: a.path,
+        hash: a.hash,
+      }))
+      const checkResults = await this.api.checkAssets(checkItems)
+      const existingMap = new Map(checkResults.map((r) => [r.hash, r.exists]))
+
+      for (const asset of vaultAssets) {
+        assetPayload.push({
+          path: asset.path,
+          hash: asset.hash,
+        })
+
+        if (!existingMap.get(asset.hash)) {
+          // Upload missing asset
+          const presign = await this.api.presignAsset({
+            filename: asset.file.name,
+            hash: asset.hash,
+            sizeBytes: asset.sizeBytes,
+            mimeType: asset.mimeType,
+          })
+
+          if (presign.uploadUrl) {
+            await this.api.uploadAssetBinary(
+              presign.uploadUrl,
+              presign.method || 'PUT',
+              asset.data,
+              asset.mimeType,
+            )
+          }
+        }
+      }
+    }
+
     const req: PublishRequest = {
       siteId: this.settings.siteId,
       sourceId,
@@ -326,6 +394,7 @@ export default class WiklyPublisherPlugin extends Plugin {
       frontmatter,
       contentHash,
       serverRevision: known?.serverRevision,
+      assets: assetPayload,
     }
 
     const res = await this.api.publish(req)
@@ -353,5 +422,123 @@ export default class WiklyPublisherPlugin extends Plugin {
     }
 
     return false
+  }
+
+  async syncPendingChanges(): Promise<number> {
+    if (
+      !this.settings.serverUrl ||
+      !this.settings.siteId ||
+      !this.settings.deviceToken
+    ) {
+      return 0
+    }
+
+    let appliedCount = 0
+    try {
+      const res = await this.api.fetchSyncChanges(this.storageData.syncCursor)
+      if (!res.success || !res.changes || res.changes.length === 0) {
+        return 0
+      }
+
+      for (const change of res.changes) {
+        // Claim change lease
+        const claim = await this.api.claimSyncChange(change.id)
+        if (!claim.success || !claim.leaseId) {
+          continue
+        }
+        const leaseId = claim.leaseId
+
+        // Locate target note by sourceId
+        let targetFile: TFile | null = null
+        const known = this.storageData.files[change.sourceId]
+        if (known) {
+          const f = this.app.vault.getAbstractFileByPath(known.path)
+          if (f instanceof TFile && f.extension === 'md') {
+            targetFile = f
+          }
+        }
+
+        if (!targetFile) {
+          const markdownFiles = this.app.vault.getMarkdownFiles()
+          for (const f of markdownFiles) {
+            const cache = this.app.metadataCache.getFileCache(f)
+            if (extractSourceId(cache?.frontmatter) === change.sourceId) {
+              targetFile = f
+              break
+            }
+          }
+        }
+
+        if (!targetFile) {
+          await this.api.ackSyncChange(change.id, {
+            success: false,
+            leaseId,
+            errorCode: 'FILE_NOT_FOUND',
+            message: `Note with source ID "${change.sourceId}" not found in Vault.`,
+          })
+          continue
+        }
+
+        try {
+          this.applyingServerChanges.add(change.sourceId)
+
+          // Apply safe frontmatter patch (preserves Markdown body)
+          await this.app.fileManager.processFrontMatter(targetFile, (fm) => {
+            applyFrontmatterPatch(fm, change.patch as FrontmatterPatch)
+          })
+
+          // Republish to synchronize server projection
+          await this.publishItem({
+            sourceId: change.sourceId,
+            path: targetFile.path,
+            scheduledAt: Date.now(),
+            attempts: 0,
+          })
+
+          const updatedContent = await this.app.vault.read(targetFile)
+          const updatedCache = this.app.metadataCache.getFileCache(targetFile)
+          const { body } = splitFrontmatterAndBody(updatedContent)
+          const contentHash = computeContentHash(
+            body,
+            updatedCache?.frontmatter,
+          )
+
+          await this.api.ackSyncChange(change.id, {
+            success: true,
+            leaseId,
+            result: {
+              sourceId: change.sourceId,
+              contentHash,
+            },
+          })
+
+          appliedCount++
+        } catch (err: unknown) {
+          console.error('Failed to apply write-back change:', err)
+          const msg =
+            err instanceof Error
+              ? err.message
+              : 'Failed to patch note or republish'
+          await this.api.ackSyncChange(change.id, {
+            success: false,
+            leaseId,
+            errorCode: 'PATCH_FAILED',
+            message: msg,
+          })
+        } finally {
+          this.applyingServerChanges.delete(change.sourceId)
+        }
+
+        this.storageData.syncCursor = change.id
+      }
+
+      if (appliedCount > 0) {
+        await this.savePluginData()
+      }
+    } catch (err) {
+      console.error('Error during Wikly sync:', err)
+    }
+
+    return appliedCount
   }
 }

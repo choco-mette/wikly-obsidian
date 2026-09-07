@@ -3,6 +3,7 @@ import { computeContentHash } from '@wikly/domain'
 import { POST as authDevicePost } from '../auth/device/route'
 import { POST as publishPost } from '../publish/route'
 import { createSite } from '@/lib/db/repos/sites'
+import { createPendingDevice, revokeDevice } from '@/lib/db/repos/devices'
 
 describe('API v1: Auth & Publishing', () => {
   const uniqueId = Date.now().toString()
@@ -20,33 +21,60 @@ describe('API v1: Auth & Publishing', () => {
     expect(data.success).toBe(false)
   })
 
-  it('registers a device and performs full publishing flow', async () => {
+  it('pairs device with one-time code, burns code, and performs publishing flow', async () => {
     // 1. Create a test site
     const site = await createSite({
       name: 'Publish Test Site',
       slug: `publish-site-${uniqueId}`,
     })
 
-    // 2. Register device via POST /api/v1/auth/device
+    // 2. Admin creates a pending device -> gets a one-time pairing code
+    const { deviceId, pairingCode, name } = await createPendingDevice(
+      site.id,
+      'Test Device MacBook',
+    )
+    expect(deviceId).toBeDefined()
+    expect(pairingCode).toMatch(/^WIK-[A-F0-9]{6}$/)
+    expect(name).toBe('Test Device MacBook')
+
+    // 3. Reject invalid pairing code
+    const invalidReq = new Request('http://localhost:3000/api/v1/auth/device', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        siteId: site.id,
+        pairingCode: 'WIK-WRONG1',
+      }),
+    })
+    const invalidRes = await authDevicePost(invalidReq)
+    expect(invalidRes.status).toBe(401)
+
+    // 4. Plugin pairs device via POST /api/v1/auth/device with valid code
     const authReq = new Request('http://localhost:3000/api/v1/auth/device', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         siteId: site.id,
-        name: 'Test Device MacBook',
+        pairingCode,
       }),
     })
 
     const authRes = await authDevicePost(authReq)
-    expect(authRes.status).toBe(201)
+    expect(authRes.status).toBe(200)
     const authData = await authRes.json()
     expect(authData.success).toBe(true)
-    expect(authData.deviceId).toBeDefined()
+    expect(authData.deviceId).toBe(deviceId)
+    expect(authData.name).toBe('Test Device MacBook')
     expect(authData.token).toBeDefined()
+    expect(authData.status).toBe('approved')
 
     const deviceToken = authData.token
 
-    // 3. Publish a new note
+    // 5. Pairing code is burned (one-time use) -> second attempt must fail
+    const authRetryRes = await authDevicePost(authReq)
+    expect(authRetryRes.status).toBe(401)
+
+    // 6. Publish a new note with approved device
     const sourceId = `01TEST${uniqueId.slice(-10)}`
     const md1 = '# Initial Title\n\nSome body text with [[Target Note]].'
     const fm1 = {
@@ -82,7 +110,7 @@ describe('API v1: Auth & Publishing', () => {
     expect(pubData1.page.revision).toBe(1)
     expect(pubData1.page.sourceId).toBe(sourceId)
 
-    // 4. Duplicate publish with exact same hash -> idempotent (changed: false, revision stays 1)
+    // 7. Duplicate publish with exact same hash -> idempotent (changed: false, revision stays 1)
     const pubReq2 = new Request('http://localhost:3000/api/v1/publish', {
       method: 'POST',
       headers: {
@@ -108,7 +136,7 @@ describe('API v1: Auth & Publishing', () => {
     expect(pubData2.changed).toBe(false)
     expect(pubData2.page.revision).toBe(1)
 
-    // 5. Incremental publish with updated content -> revision bumps to 2
+    // 8. Incremental publish with updated content -> revision bumps to 2
     const md2 = '# Updated Title\n\nUpdated body.'
     const fm2 = { ...fm1, title: 'Updated Title' }
     const hash2 = computeContentHash(md2, fm2)
@@ -139,7 +167,7 @@ describe('API v1: Auth & Publishing', () => {
     expect(pubData3.changed).toBe(true)
     expect(pubData3.page.revision).toBe(2)
 
-    // 6. Concurrency conflict with stale serverRevision
+    // 9. Concurrency conflict with stale serverRevision
     const pubReqConflict = new Request('http://localhost:3000/api/v1/publish', {
       method: 'POST',
       headers: {
@@ -161,5 +189,28 @@ describe('API v1: Auth & Publishing', () => {
 
     const pubResConflict = await publishPost(pubReqConflict)
     expect(pubResConflict.status).toBe(409)
+
+    // 10. Revoke device -> subsequent publish must be rejected (401)
+    await revokeDevice(deviceId)
+    const pubReqRevoked = new Request('http://localhost:3000/api/v1/publish', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${deviceToken}`,
+      },
+      body: JSON.stringify({
+        siteId: site.id,
+        sourceId,
+        path: 'Docs/Updated Title.md',
+        title: 'Updated Title',
+        slug: 'updated-title',
+        markdown: md2,
+        frontmatter: fm2,
+        contentHash: hash2,
+        serverRevision: 2,
+      }),
+    })
+    const pubResRevoked = await publishPost(pubReqRevoked)
+    expect(pubResRevoked.status).toBe(401)
   })
 })

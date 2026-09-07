@@ -42,54 +42,75 @@ export class WiklySettingTab extends PluginSettingTab {
           }),
       )
 
-    new Setting(containerEl)
-      .setName('Device Name')
-      .setDesc('A friendly name to identify this Obsidian device/client.')
-      .addText((text) =>
-        text
-          .setValue(this.plugin.settings.deviceName)
-          .onChange(async (value) => {
-            this.plugin.settings.deviceName = value.trim()
-            await this.plugin.saveSettings()
-          }),
-      )
+    if (!this.plugin.settings.deviceToken) {
+      new Setting(containerEl)
+        .setName('Pairing Code')
+        .setDesc(
+          'Enter the temporary one-time pairing code generated from Wikly Admin (e.g. WIK-8821).',
+        )
+        .addText((text) =>
+          text
+            .setPlaceholder('WIK-XXXXXX')
+            .setValue(this.plugin.settings.pairingCode)
+            .onChange(async (value) => {
+              this.plugin.settings.pairingCode = value.trim()
+              await this.plugin.saveSettings()
+            }),
+        )
 
-    new Setting(containerEl)
-      .setName('Device Authentication')
-      .setDesc(
-        this.plugin.settings.deviceToken
-          ? 'Device is paired. Token is securely stored.'
-          : 'Device is not paired yet. Click Register Device to generate a scoped token.',
-      )
-      .addButton((button) =>
-        button
-          .setButtonText(
-            this.plugin.settings.deviceToken
-              ? 'Re-pair Device'
-              : 'Register Device',
-          )
-          .setCta()
-          .onClick(async () => {
-            try {
-              button.setDisabled(true)
-              button.setButtonText('Registering...')
-              const res = await this.plugin.api.registerDevice(
-                this.plugin.settings.deviceName,
-              )
-              if (res.token) {
-                this.plugin.settings.deviceToken = res.token
-                await this.plugin.saveSettings()
-                new Notice('Wikly: Device registered and paired successfully!')
-                this.display()
+      new Setting(containerEl)
+        .setName('Device Pairing')
+        .setDesc('Pair this Obsidian vault with your Wikly site.')
+        .addButton((button) =>
+          button
+            .setButtonText('Pair Device')
+            .setCta()
+            .onClick(async () => {
+              try {
+                button.setDisabled(true)
+                button.setButtonText('Pairing...')
+                const res = await this.plugin.api.pairDevice(
+                  this.plugin.settings.pairingCode,
+                )
+                if (res.token) {
+                  this.plugin.settings.deviceToken = res.token
+                  if (res.name) {
+                    this.plugin.settings.deviceName = res.name
+                  }
+                  this.plugin.settings.pairingCode = ''
+                  await this.plugin.saveSettings()
+                  new Notice(
+                    `Wikly: Device paired successfully as "${this.plugin.settings.deviceName || 'Obsidian Client'}"!`,
+                  )
+                  this.display()
+                }
+              } catch (err) {
+                const msg = err instanceof Error ? err.message : 'Unknown error'
+                new Notice(`Wikly pairing error: ${msg}`)
+              } finally {
+                button.setDisabled(false)
               }
-            } catch (err) {
-              const msg = err instanceof Error ? err.message : 'Unknown error'
-              new Notice(`Wikly error: ${msg}`)
-            } finally {
-              button.setDisabled(false)
-            }
-          }),
-      )
+            }),
+        )
+    } else {
+      new Setting(containerEl)
+        .setName('Device Status')
+        .setDesc(
+          `Paired as "${this.plugin.settings.deviceName || 'Obsidian Client'}". Token securely stored.`,
+        )
+        .addButton((button) =>
+          button
+            .setButtonText('Unpair Device')
+            .setWarning()
+            .onClick(async () => {
+              this.plugin.settings.deviceToken = ''
+              this.plugin.settings.pairingCode = ''
+              await this.plugin.saveSettings()
+              new Notice('Wikly: Device has been unpaired.')
+              this.display()
+            }),
+        )
+    }
 
     new Setting(containerEl)
       .setName('Publish debounce (ms)')
@@ -123,6 +144,32 @@ export class WiklySettingTab extends PluginSettingTab {
             if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 60) {
               this.plugin.settings.syncIntervalMinutes = parsed
               await this.plugin.saveSettings()
+            }
+          }),
+      )
+
+    new Setting(containerEl)
+      .setName('Manual Sync')
+      .setDesc('Pull write-back changes from Admin and flush publish queue.')
+      .addButton((button) =>
+        button
+          .setButtonText('Sync Now')
+          .setCta()
+          .onClick(async () => {
+            button.setDisabled(true)
+            button.setButtonText('Syncing...')
+            try {
+              const applied = await this.plugin.syncPendingChanges()
+              await this.plugin.queue.flushAll()
+              new Notice(
+                `Wikly: Sync complete.${applied > 0 ? ` Applied ${applied} change(s).` : ' Up to date.'}`,
+              )
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : 'Failed'
+              new Notice(`Wikly sync error: ${msg}`)
+            } finally {
+              button.setDisabled(false)
+              button.setButtonText('Sync Now')
             }
           }),
       )

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { BookOpen, FileText, Hash, Menu, Search, X } from 'lucide-react'
+import { BookOpen, FileText, Hash, Menu, Search, Share2, X } from 'lucide-react'
 
 interface WikiNavProps {
   siteName: string
@@ -101,6 +101,14 @@ export function WikiNav({ siteName, pages }: WikiNavProps) {
             >
               <Hash size={16} />
               <span>Daftar Tag</span>
+            </Link>
+            <Link
+              href="/graph"
+              onClick={() => setIsOpen(false)}
+              className={`nav-link ${pathname === '/graph' ? 'active' : ''}`}
+            >
+              <Share2 size={16} />
+              <span>Graf Relasi</span>
             </Link>
           </div>
 

@@ -170,7 +170,14 @@ export const devices = pgTable('devices', {
     .notNull()
     .references(() => sites.id),
   name: text('name').notNull(),
-  tokenHash: text('token_hash').notNull(),
+  pairingCodeHash: text('pairing_code_hash'),
+  pairingCodeExpiresAt: timestamp('pairing_code_expires_at', {
+    withTimezone: true,
+  }),
+  tokenHash: text('token_hash'),
+  status: text('status').notNull().default('pending'),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  approvedBy: uuid('approved_by').references(() => users.id),
   lastSeenAt: timestamp('last_seen_at', { withTimezone: true }),
   createdAt: timestamps.createdAt,
 })

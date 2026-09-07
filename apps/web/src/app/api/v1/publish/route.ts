@@ -2,8 +2,28 @@ import { NextResponse } from 'next/server'
 import { publishRequestSchema } from '@wikly/validation'
 import { devicesRepo, publishingRepo } from '@/lib/db'
 import { RevisionConflictError } from '@/lib/db/repos/publishing'
+import { checkRateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rateLimit'
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
+  const rateLimit = checkRateLimit(`publish:${ip}`, {
+    intervalMs: 60_000,
+    maxRequests: 120,
+  })
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Terlalu banyak permintaan publikasi. Tunggu sebentar.',
+      },
+      {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimit),
+      },
+    )
+  }
+
   try {
     const authHeader = request.headers.get('Authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -54,6 +74,7 @@ export async function POST(request: Request) {
       frontmatter: payload.frontmatter,
       contentHash: payload.contentHash,
       serverRevision: payload.serverRevision,
+      assets: payload.assets,
     })
 
     return NextResponse.json(

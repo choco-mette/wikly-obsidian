@@ -1,3 +1,4 @@
+import { createHash, timingSafeEqual } from 'node:crypto'
 import { eq } from 'drizzle-orm'
 import { db } from '../client'
 import { users } from '../schema'
@@ -14,4 +15,27 @@ export async function createUser(user: InsertUser): Promise<User> {
 export async function getUserByEmail(email: string): Promise<User | null> {
   const [user] = await db.select().from(users).where(eq(users.email, email))
   return user ?? null
+}
+
+export async function verifyAdminCredentials(
+  email: string,
+  password: string,
+): Promise<User | null> {
+  const user = await getUserByEmail(email)
+  if (!user || !user.passwordHash) {
+    return null
+  }
+
+  const computedHash = createHash('sha256').update(password).digest('hex')
+  const userHashBuf = Buffer.from(user.passwordHash, 'hex')
+  const compHashBuf = Buffer.from(computedHash, 'hex')
+
+  if (
+    userHashBuf.length !== compHashBuf.length ||
+    !timingSafeEqual(userHashBuf, compHashBuf)
+  ) {
+    return null
+  }
+
+  return user
 }

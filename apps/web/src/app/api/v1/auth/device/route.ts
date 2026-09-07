@@ -1,8 +1,28 @@
 import { NextResponse } from 'next/server'
 import { deviceAuthRequestSchema } from '@wikly/validation'
 import { devicesRepo } from '@/lib/db'
+import { checkRateLimit, getClientIp, getRateLimitHeaders } from '@/lib/rateLimit'
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request)
+  const rateLimit = checkRateLimit(`auth-device:${ip}`, {
+    intervalMs: 60_000,
+    maxRequests: 10,
+  })
+
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Terlalu banyak percobaan autentikasi. Silakan tunggu sebentar.',
+      },
+      {
+        status: 429,
+        headers: getRateLimitHeaders(rateLimit),
+      },
+    )
+  }
+
   try {
     const json = await request.json()
     const parsed = deviceAuthRequestSchema.safeParse(json)
@@ -17,16 +37,21 @@ export async function POST(request: Request) {
       )
     }
 
-    const { siteId, name } = parsed.data
-    const { deviceId, token } = await devicesRepo.registerDevice(siteId, name)
+    const { siteId, pairingCode } = parsed.data
+    const { deviceId, name, token } = await devicesRepo.pairDevice(
+      siteId,
+      pairingCode,
+    )
 
     return NextResponse.json(
       {
         success: true,
         deviceId,
+        name,
         token,
+        status: 'approved',
       },
-      { status: 201 },
+      { status: 200 },
     )
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error'
@@ -35,7 +60,7 @@ export async function POST(request: Request) {
         success: false,
         error: message,
       },
-      { status: 400 },
+      { status: 401 },
     )
   }
 }

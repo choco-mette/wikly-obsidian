@@ -1,7 +1,8 @@
-import { parseWikilinks, slugify } from '@wikly/domain'
+import { extractAliases, parseWikilinks, slugify } from '@wikly/domain'
 import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '../client'
 import { pageLinks, pageRevisions, pages, pageTags, tags } from '../schema'
+import { syncPageAssets } from './assets'
 
 export class RevisionConflictError extends Error {
   constructor(
@@ -25,6 +26,7 @@ export interface PublishPagePayload {
   frontmatter: Record<string, unknown>
   contentHash: string
   serverRevision?: number
+  assets?: { path: string; hash: string }[]
 }
 
 export interface PublishResult {
@@ -111,6 +113,7 @@ export async function publishPage(
 
     await syncPageTags(existing.id, siteId, payload.frontmatter)
     await syncPageLinks(existing.id, siteId, payload.markdown)
+    await syncPageAssets(existing.id, siteId, payload.assets || [])
 
     return {
       changed: true,
@@ -170,6 +173,7 @@ export async function publishPage(
 
   await syncPageTags(created.id, siteId, payload.frontmatter)
   await syncPageLinks(created.id, siteId, payload.markdown)
+  await syncPageAssets(created.id, siteId, payload.assets || [])
 
   return {
     changed: true,
@@ -239,7 +243,7 @@ async function syncPageTags(
   }
 }
 
-async function syncPageLinks(
+export async function syncPageLinks(
   sourcePageId: string,
   siteId: string,
   markdown: string,
@@ -251,10 +255,51 @@ async function syncPageLinks(
 
   const targetSlugs = linkTargets.map((t) => slugify(t))
 
+  // 1. Direct slug matches
   const matchedPages = await db
     .select({ id: pages.id, slug: pages.slug, title: pages.title })
     .from(pages)
     .where(and(eq(pages.siteId, siteId), inArray(pages.slug, targetSlugs)))
+
+  const linkedIds = new Set(matchedPages.map((p) => p.id))
+  const matchedSlugs = new Set(matchedPages.map((p) => p.slug))
+
+  // 2. Check unmatched targets against frontmatter aliases
+  const unmatchedTargets = linkTargets.filter(
+    (t) => !matchedSlugs.has(slugify(t)),
+  )
+
+  if (unmatchedTargets.length > 0) {
+    const allPublished = await db
+      .select({
+        id: pages.id,
+        slug: pages.slug,
+        title: pages.title,
+        frontmatter: pages.frontmatter,
+      })
+      .from(pages)
+      .where(and(eq(pages.siteId, siteId), eq(pages.status, 'published')))
+
+    for (const target of unmatchedTargets) {
+      const targetNorm = slugify(target)
+      for (const p of allPublished) {
+        const aliases = extractAliases(p.frontmatter as Record<string, unknown>)
+        if (
+          aliases.some(
+            (a) =>
+              slugify(a) === targetNorm ||
+              a.toLowerCase() === target.toLowerCase(),
+          )
+        ) {
+          if (!linkedIds.has(p.id)) {
+            matchedPages.push({ id: p.id, slug: p.slug, title: p.title })
+            linkedIds.add(p.id)
+          }
+          break
+        }
+      }
+    }
+  }
 
   for (const target of matchedPages) {
     if (target.id !== sourcePageId) {
