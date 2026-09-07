@@ -203,10 +203,20 @@ importers:
         version: 4.5.4
 
   plugins/obsidian-wiki:
+    dependencies:
+      '@wikly/api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/api-contracts
+      '@wikly/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
     devDependencies:
       '@eslint/js':
         specifier: ^9.0.0
         version: 9.39.5
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.3
       esbuild:
         specifier: ^0.25.0
         version: 0.25.12

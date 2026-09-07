@@ -40,6 +40,46 @@ melanjutkan implementasi.
 
 ---
 
+## 2026-09-07T12:12:00+07:00 — Phase 3 / Obsidian plugin publishing MVP
+
+**Status:** complete
+
+### Changed
+
+- `@wikly/domain`: menambahkan `generateSourceId` (Crockford base32 ULID compatible), `computeContentHash` (SHA-256), `isPublishable`, `extractSourceId`, `slugify`, dan `parseWikilinks`.
+- `@wikly/api-contracts`: mendefinisikan konstanta rute API (`AUTH_DEVICE_PATH`, `PUBLISH_PATH`) dan interface DTO (`DeviceAuthRequest`, `DeviceAuthResponse`, `PublishRequest`, `PublishResponse`).
+- `@wikly/validation`: menambahkan schema Zod untuk validasi request device auth dan publish note (`deviceAuthRequestSchema`, `publishRequestSchema`).
+- Server Backend (`apps/web`):
+  - Menambahkan repository `devices.ts` untuk registrasi perangkat dan validasi token berbasis SHA-256 hash.
+  - Menambahkan repository `publishing.ts` untuk pemrosesan publikasi idempotent, optimistic concurrency check (`serverRevision`), pencatatan riwayat di `page_revisions`, serta sinkronisasi otomatis relasi `tags` dan `page_links`.
+  - Mengimplementasikan endpoint API `POST /api/v1/auth/device` dan `POST /api/v1/publish` dengan autentikasi header `Bearer <token>`.
+- Obsidian Plugin (`plugins/obsidian-wiki`):
+  - Mengimplementasikan `PublishQueue` dengan fitur debounce, deduplikasi berdasarkan `sourceId`, dan mekanisme retry backoff bertahap.
+  - Mengimplementasikan `WiklyApiClient` memanfaatkan fungsi native `requestUrl` Obsidian.
+  - Menambahkan frontmatter helpers untuk deteksi dan injeksi otomatis `sourceId` stabil (`wiki.id`).
+  - Menghubungkan event listener Vault (`modify`, `create`, `rename`, `delete`) untuk penerbitan inkremental berbasis event.
+  - Memperbarui `WiklySettingTab` dengan formulir konfigurasi koneksi, pairing perangkat, dan durasi debounce.
+  - Menambahkan status bar item, ribbon icon, dan perintah command palette ("Publish active note", "Unpublish active note", "Sync now").
+
+### Verified
+
+- `pnpm test`: Lulus semua test suite (unit test `@wikly/domain`, `@wikly/validation`, `@wikly/obsidian-plugin`, dan integration test API di `@wikly/web`).
+- `pnpm typecheck`: Lulus validasi TypeScript di seluruh 6 workspace package.
+- `pnpm lint`: Lulus verifikasi ESLint tanpa error dan warning.
+- `pnpm build`: Berhasil mengompilasi bundel esbuild `main.js` plugin Obsidian dan bundel produksi Next.js.
+
+### Decisions
+
+- Otentikasi perangkat menyimpan SHA-256 hash token di tabel `devices` (`token_hash`), mengembalikan plain token sekali untuk disimpan di pengaturan lokal plugin.
+- Publikasi catatan yang kontennya tidak berubah (hash identik) diakui server dengan `changed: false` tanpa menaikkan revisi atau menambah baris di `page_revisions`.
+- Saat sebuah catatan di-rename atau dipindah folder, `sourceId` di frontmatter tetap dipertahankan sehingga tidak membuat record halaman baru di database.
+
+### Blockers / Next
+
+- Siap lanjut ke **Phase 4 — Asset pipeline**: ekstraksi referensi aset/gambar, hash-based dedupe, presigned upload endpoint, relasi `page_assets`, dan pelacakan orphan.
+
+---
+
 ## 2026-09-06T23:44:00+07:00 — Phase 2 / basic public wiki
 
 **Status:** complete

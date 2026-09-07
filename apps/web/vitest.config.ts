@@ -6,6 +6,11 @@ import { config } from 'dotenv'
 config({ path: fileURLToPath(new URL('../../.env', import.meta.url)) })
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts'],

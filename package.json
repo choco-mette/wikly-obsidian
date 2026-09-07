@@ -7,6 +7,7 @@
     "build": "pnpm --recursive run build",
     "db:generate": "pnpm --filter @wikly/web db:generate",
     "db:migrate": "pnpm --filter @wikly/web db:migrate",
+    "db:seed": "pnpm --filter @wikly/web db:seed",
     "dev": "pnpm --filter @wikly/web dev",
     "dev:web": "pnpm --filter @wikly/web dev",
     "dev:plugin": "pnpm --filter @wikly/obsidian-plugin dev",
